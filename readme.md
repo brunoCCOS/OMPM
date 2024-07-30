@@ -1,6 +1,3 @@
-Sure, here is the complete `README.md` content in markdown format:
-
-```markdown
 # Project Manager
 
 Project Manager is a command-line tool written in Rust to help you initialize and manage project repositories for multiple programming languages. It supports creating a new project with Git initialization, adding default files, and creating language-specific project setups.
