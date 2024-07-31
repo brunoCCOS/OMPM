@@ -1,5 +1,5 @@
 use clap::{command, Parser, Subcommand};
-use ompm::{init_project, add_file, clean_project,files::License};
+use ompm::{init_project, add_file, clean_project,files::license::License};
 
 #[derive(Parser)]
 #[command(name = "OMIC")]

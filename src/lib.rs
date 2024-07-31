@@ -3,7 +3,7 @@ use git2::Repository;
 pub mod files;
 
 
-pub fn init_project(name: &str, language: &Option<String>, full: bool, license: files::License) {
+pub fn init_project(name: &str, language: &Option<String>, full: bool, license: files::license::License) {
 
     let path = Path::new(name);
     if path.exists() {
