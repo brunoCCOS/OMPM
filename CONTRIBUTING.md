@@ -7,7 +7,7 @@ Thank you for considering contributing to Project Manager! Here are some guideli
 1. Fork the repository.
 2. Clone your forked repository:
     ```sh
-    git clone https://github.com/your-username/project_manager.git
+    git clone https://github.com/your-username/OMPM.git
     ```
 3. Create a new branch for your feature or bugfix:
     ```sh

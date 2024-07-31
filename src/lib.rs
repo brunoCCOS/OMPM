@@ -1,6 +1,10 @@
+use std::{env, fs, path::Path};
+use git2::Repository;
+pub mod files;
 
 
-fn init_project(name: &str, language: &str, full: bool) {
+pub fn init_project(name: &str, language: &Option<String>, full: bool, license: files::License) {
+
     let path = Path::new(name);
     if path.exists() {
         eprintln!("Error: Directory {} already exists!", name);
@@ -15,36 +19,40 @@ fn init_project(name: &str, language: &str, full: bool) {
         Err(e) => eprintln!("Failed to initialize Git repository: {}", e),
     }
 
-    // Create language-specific files
-    match language.to_lowercase().as_str() {
-        "rust" => {
-            create_rust_project_files(path, full);
-        }
-        "python" => {
-            create_python_project_files(path, full);
-        }
-        "node" | "javascript" => {
-            create_node_project_files(path, full);
-        }
-        _ => {
-            eprintln!("Unsupported language: {}", language);
-            return;
-        }
+    if full {
+        // Create common project files
+        files::create_readme(path, name);
+        files::create_gitignore(path, "target");
+        files::create_contribute(path, name);
+        files::create_code_of_conduct(path);
+        files::create_license(path, license);
     }
 
-    println!("Project {} initialized with {} language profile", name, language);
+    // Ensure language is present and convert to lowercase
+    if let Some(lang) = language {
+        match lang.to_lowercase().as_str() {
+            "rust" => {
+                create_rust_project_files(path, full);
+            }
+            "python" => {
+                create_python_project_files(path, full);
+            }
+            "node" | "javascript" => {
+                create_node_project_files(path, full);
+            }
+            _ => {
+                eprintln!("Unsupported language: {}", lang);
+                return;
+            }
+        }
+    } else {
+        eprintln!("Error: No language specified");
+        return;
+    }
 }
 
 
-fn create_rust_project_files(path: &Path, full: bool) {
-    // Create a README file
-    let readme_path = path.join("README.md");
-    fs::write(&readme_path, "# Rust Project\n").expect("Failed to create README.md");
-
-    // Create a .gitignore file
-    let gitignore_path = path.join(".gitignore");
-    fs::write(&gitignore_path, "target/\n").expect("Failed to create .gitignore");
-
+pub fn create_rust_project_files(path: &Path, full: bool) {
     // Create a Cargo.toml file
     let cargo_toml_path = path.join("Cargo.toml");
     fs::write(&cargo_toml_path, "[package]\nname = \"project\"\nversion = \"0.1.0\"\nedition = \"2021\"\n").expect("Failed to create Cargo.toml");
@@ -54,7 +62,7 @@ fn create_rust_project_files(path: &Path, full: bool) {
         let src_path = path.join("src");
         fs::create_dir(&src_path).expect("Failed to create src directory");
         let main_rs_path = src_path.join("main.rs");
-        fs::write(&main_rs_path, "fn main() {\n    println!(\"Hello, Rust project!\");\n}\n").expect("Failed to create main.rs");
+        fs::write(&main_rs_path, "pub fn main() {\n    println!(\"Hello, Rust project!\");\n}\n").expect("Failed to create main.rs");
 
         println!("Created additional Rust project files for full setup");
     }
@@ -62,15 +70,7 @@ fn create_rust_project_files(path: &Path, full: bool) {
     println!("Created Rust project files");
 }
 
-fn create_python_project_files(path: &Path, full: bool) {
-    // Create a README file
-    let readme_path = path.join("README.md");
-    fs::write(&readme_path, "# Python Project\n").expect("Failed to create README.md");
-
-    // Create a .gitignore file
-    let gitignore_path = path.join(".gitignore");
-    fs::write(&gitignore_path, "__pycache__/\n*.pyc\n").expect("Failed to create .gitignore");
-
+pub fn create_python_project_files(path: &Path, full: bool) {
     // Create a main.py file
     let main_py_path = path.join("main.py");
     fs::write(&main_py_path, "if __name__ == '__main__':\n    print('Hello, Python project!')\n").expect("Failed to create main.py");
@@ -91,14 +91,7 @@ fn create_python_project_files(path: &Path, full: bool) {
     println!("Created Python project files");
 }
 
-fn create_node_project_files(path: &Path, full: bool) {
-    // Create a README file
-    let readme_path = path.join("README.md");
-    fs::write(&readme_path, "# Node.js Project\n").expect("Failed to create README.md");
-
-    // Create a .gitignore file
-    let gitignore_path = path.join(".gitignore");
-    fs::write(&gitignore_path, "node_modules/\n").expect("Failed to create .gitignore");
+pub fn create_node_project_files(path: &Path, full: bool) {
 
     // Create a package.json file
     let package_json_path = path.join("package.json");
@@ -121,7 +114,7 @@ fn create_node_project_files(path: &Path, full: bool) {
     println!("Created Node.js project files");
 }
 
-fn add_file(file_type: &str) {
+pub fn add_file(file_type: &str) {
     match file_type {
         "readme" => {
             fs::write("README.md", "# Project\n").expect("Failed to create README.md");
@@ -135,4 +128,12 @@ fn add_file(file_type: &str) {
             eprintln!("Unknown file type: {}", file_type);
         }
     }
+}
+
+pub fn clean_project() -> std::io::Result<()> {
+    let current_project = env::current_dir()?;
+    let project_display = current_project.display().to_string();
+    fs::remove_dir_all(current_project)?;
+    println!("Project {} deleted", project_display);
+    Ok(())
 }

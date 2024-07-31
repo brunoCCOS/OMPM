@@ -1,4 +1,5 @@
-
+use clap::{command, Parser, Subcommand};
+use ompm::{init_project, add_file, clean_project,files::License};
 
 #[derive(Parser)]
 #[command(name = "OMIC")]
@@ -20,18 +21,23 @@ enum Commands {
         #[arg(short, long)]
         full: bool,
 
+        #[arg(value_enum)]
+        license: License,
+
     },
 
-    Clean {
-        #[arg(short,long)]
-        hard: Option<String>
-    }
+    Add { file : String },
+
+
+    Clean
 }
+
 
 fn main() {
     let cli = Cli::parse();
     match &cli.command {
-        Commands::Init { name, language, full } => init_project(name, language, *full),
-        Commands::Clean { hard } => clean_project(hard),
+        Commands::Init { name, language, full, license } => init_project(name, language, *full,*license),
+        Commands::Add { file } => add_file(file),
+        Commands::Clean => clean_project().expect("Failed to clean the project"),
     }
 }
